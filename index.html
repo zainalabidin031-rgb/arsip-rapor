@@ -191,7 +191,140 @@ Google Spreadsheet berdasarkan NISN.
 ========================================
 */
 </script>
+<script>
+const SPREADSHEET_ID = "1fmjRjhstWd1n_il7mTQXp6uyLxEUNMdJOIesL8B3UKo";
+const SHEET_NAME = "rapor";
 
+let semuaData = [];
+
+// Ambil data dari Google Sheet
+async function loadData() {
+    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+
+    const res = await fetch(url);
+    const text = await res.text();
+
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+
+    semuaData = json.table.rows.map(r =>
+        r.c.map(c => c ? (c.f || c.v) : "")
+    );
+}
+
+// Jalankan saat halaman dibuka
+window.addEventListener("load", async () => {
+    try {
+        await loadData();
+    } catch (e) {
+        document.getElementById("pesanStatus").innerHTML =
+            `<div class="alert alert-danger">
+                Gagal memuat data spreadsheet.
+            </div>`;
+    }
+});
+
+// Tombol Cari
+document.getElementById("btnCari").addEventListener("click", () => {
+
+    const nisn = document.getElementById("nisnInput").value.trim();
+
+    if (!nisn) {
+        alert("Masukkan NISN terlebih dahulu.");
+        return;
+    }
+
+    const hasil = semuaData.filter(row => String(row[0]).trim() === nisn);
+
+    if (hasil.length === 0) {
+
+        document.getElementById("pesanStatus").innerHTML =
+            `<div class="alert alert-danger">
+                Data tidak ditemukan.
+            </div>`;
+
+        document.getElementById("hasilArea").style.display = "none";
+        return;
+    }
+
+    document.getElementById("pesanStatus").innerHTML = "";
+
+    document.getElementById("hasilArea").style.display = "block";
+
+    document.getElementById("namaSiswa").textContent = hasil[0][1];
+    document.getElementById("nisnSiswa").textContent = hasil[0][0];
+    document.getElementById("peringkatSiswa").textContent = hasil[0][2] || "-";
+
+    // Isi dropdown Tahun
+    const tahunSelect = document.getElementById("tahunSelect");
+    tahunSelect.innerHTML = '<option value="">Pilih Tahun</option>';
+
+    [...new Set(hasil.map(x => x[3]))].forEach(tahun => {
+        tahunSelect.innerHTML +=
+            `<option value="${tahun}">${tahun}</option>`;
+    });
+
+    // Reset semester
+    document.getElementById("semesterSelect").innerHTML =
+        '<option value="">Pilih Semester</option>';
+});
+
+// Saat Tahun berubah
+document.getElementById("tahunSelect").addEventListener("change", () => {
+
+    const nisn = document.getElementById("nisnInput").value.trim();
+    const tahun = document.getElementById("tahunSelect").value;
+
+    const semesterSelect = document.getElementById("semesterSelect");
+
+    semesterSelect.innerHTML =
+        '<option value="">Pilih Semester</option>';
+
+    const data = semuaData.filter(r =>
+        String(r[0]).trim() === nisn &&
+        String(r[3]) === tahun
+    );
+
+    [...new Set(data.map(x => x[4]))].forEach(semester => {
+
+        semesterSelect.innerHTML +=
+            `<option value="${semester}">
+                ${semester}
+            </option>`;
+    });
+
+});
+
+// Tombol tampilkan nilai
+document.getElementById("btnTampil").addEventListener("click", () => {
+
+    const nisn = document.getElementById("nisnInput").value.trim();
+    const tahun = document.getElementById("tahunSelect").value;
+    const semester = document.getElementById("semesterSelect").value;
+
+    const row = semuaData.find(r =>
+        String(r[0]).trim() === nisn &&
+        String(r[3]) === tahun &&
+        String(r[4]) === semester
+    );
+
+    if (!row) {
+        alert("Data rapor tidak ditemukan.");
+        return;
+    }
+
+    document.getElementById("pai").textContent = row[5];
+    document.getElementById("pkn").textContent = row[6];
+    document.getElementById("bin").textContent = row[7];
+    document.getElementById("mtk").textContent = row[8];
+    document.getElementById("ipas").textContent = row[9];
+    document.getElementById("pjok").textContent = row[10];
+    document.getElementById("seni").textContent = row[11];
+    document.getElementById("big").textContent = row[12];
+    document.getElementById("bj").textContent = row[13];
+    document.getElementById("lidi").textContent = row[14];
+
+});
+</script>
 </body>
 </html>
 ```
