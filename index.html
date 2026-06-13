@@ -176,20 +176,7 @@
 
 <script>
 /*
-========================================
 
-Nanti kita isi script.js di tahap berikutnya.
-
-Yang perlu diganti:
-
-const SPREADSHEET_ID = "...";
-const SHEET_NAME = "rapor";
-
-Lalu tombol Cari akan membaca data dari
-Google Spreadsheet berdasarkan NISN.
-
-========================================
-*/
 </script>
 <script>
 const SPREADSHEET_ID = "1fmjRjhstWd1n_il7mTQXp6uyLxEUNMdJOIesL8B3UKo";
@@ -199,7 +186,7 @@ let semuaData = [];
 
 // Ambil data dari Google Sheet
 async function loadData() {
-    const url = `https://docs.google.com/spreadsheets/d/${1fmjRjhstWd1n_il7mTQXp6uyLxEUNMdJOIesL8B3UKo}/gviz/tq?tqx=out:json&sheet=${rapor}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
 
     const res = await fetch(url);
     const text = await res.text();
